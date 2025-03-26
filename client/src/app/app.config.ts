@@ -8,11 +8,10 @@ import { withNgxsStoragePlugin } from '@ngxs/storage-plugin';
 import { withNgxsWebSocketPlugin } from '@ngxs/websocket-plugin';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes), provideStore(
-[],
-), provideStore(
-[],
-withNgxsReduxDevtoolsPlugin(),
-withNgxsStoragePlugin(),
-withNgxsWebSocketPlugin())]
+  providers: [
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes),
+    provideStore([]),
+    provideStore([], withNgxsReduxDevtoolsPlugin(), withNgxsStoragePlugin(), withNgxsWebSocketPlugin()),
+  ],
 };

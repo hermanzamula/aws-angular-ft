@@ -1,4 +1,4 @@
-const esModules = ['@angular'].join('|')
+const esModules = ['@angular'].join('|');
 
 /**
  * @type {import('@jest/types').Config.InitialOptions}
@@ -27,4 +27,4 @@ module.exports = {
   coverageReporters: ['html'],
   // setupFilesAfterEnv: ['<rootDir>/src/setup-jest.ts'],
   moduleFileExtensions: ['ts', 'js', 'mjs', 'html', 'json'],
-}
+};
