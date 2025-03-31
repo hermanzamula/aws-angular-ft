@@ -7,13 +7,14 @@ export default {
     {
       http: {
         method: 'post',
-        path: 'hello',
+        path: 'v1/tasks',
         request: {
           schemas: {
             'application/json': schema,
-          },
+          }
         },
-      },
-    },
-  ],
+        cors: true
+      }
+    }
+  ]
 };
