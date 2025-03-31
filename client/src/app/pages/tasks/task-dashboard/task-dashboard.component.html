@@ -1,0 +1,25 @@
+<form [formGroup]="taskForm" (ngSubmit)="onSubmit()">
+  <textarea formControlName="answer" placeholder="Your answer..." rows="3"></textarea>
+  <button type="submit" [disabled]="(loading$ | async)">Submit Task</button>
+</form>
+
+<table>
+  <thead>
+  <tr>
+    <th>Task ID</th>
+    <th>Answer</th>
+    <th>Status</th>
+    <th>Retries</th>
+    <th>Error</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let task of (tasks$ | async)">
+    <td>{{ task.taskId }}</td>
+    <td>{{ task.answer }}</td>
+    <td>{{ task.status }}</td>
+    <td>{{ task.retries }}</td>
+    <td>{{ task.errorMessage }}</td>
+  </tr>
+  </tbody>
+</table>

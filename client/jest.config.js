@@ -1,4 +1,4 @@
-const esModules = ['@angular'].join('|');
+const esModules = ['@angular', '@ngxs'].join('|');
 
 /**
  * @type {import('@jest/types').Config.InitialOptions}
@@ -16,7 +16,7 @@ module.exports = {
       },
     ],
     '^.+\\.js$': 'babel-jest',
-    '^.+\\.mjs$': 'babel-jest', // Transform ES Modules with Babel
+    '^.+\\.mjs$': 'babel-jest',
   },
   clearMocks: true,
   collectCoverage: true,
