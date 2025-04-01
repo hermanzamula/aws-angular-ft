@@ -1,8 +1,9 @@
 import { SQSEvent } from 'aws-lambda';
-import { DynamoDB, SQS } from 'aws-sdk';
+import { DynamoDBClient, UpdateItemCommand } from '@aws-sdk/client-dynamodb';
+import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 
-const dynamo = new DynamoDB.DocumentClient();
-const sqs = new SQS();
+const dynamo = new DynamoDBClient({});
+const sqs = new SQSClient({});
 
 const TABLE_NAME = process.env.TASK_TABLE as string;
 const QUEUE_URL = process.env.TASK_QUEUE_URL as string;
@@ -17,55 +18,84 @@ export const main = async (event: SQSEvent) => {
         throw new Error('Simulated failure');
       }
 
-      await dynamo.update({
-        TableName: TABLE_NAME,
-        Key: { taskId },
-        UpdateExpression: 'SET #status = :status, retries = :r, errorMessage = :e',
-        ExpressionAttributeNames: { '#status': 'status' },
-        ExpressionAttributeValues: {
-          ':status': 'Processed',
-          ':r': attempt,
-          ':e': ''
-        }
-      }).promise();
+      await dynamo.send(
+        new UpdateItemCommand({
+          TableName: TABLE_NAME,
+          Key: {
+            taskId: { S: taskId },
+          },
+          UpdateExpression: 'SET #status = :status, retries = :r, errorMessage = :e',
+          ExpressionAttributeNames: {
+            '#status': 'status',
+          },
+          ExpressionAttributeValues: {
+            ':status': { S: 'Processed' },
+            ':r': { N: attempt.toString() },
+            ':e': { S: '' },
+          },
+        }),
+      );
 
       console.log(`Task ${taskId} processed successfully`);
-
     } catch (error) {
       const retryCount = attempt + 1;
 
       if (retryCount < 2) {
-        await dynamo.update({
-          TableName: TABLE_NAME,
-          Key: { taskId },
-          UpdateExpression: 'SET retries = :r',
-          ExpressionAttributeValues: { ':r': retryCount }
-        }).promise();
+        await dynamo.send(
+          new UpdateItemCommand({
+            TableName: TABLE_NAME,
+            Key: {
+              taskId: { S: taskId },
+            },
+            UpdateExpression: 'SET retries = :r',
+            ExpressionAttributeValues: {
+              ':r': { N: retryCount.toString() },
+            },
+          }),
+        );
 
-        await sqs.sendMessage({
-          QueueUrl: QUEUE_URL,
-          MessageBody: JSON.stringify({ taskId, answer, attempt: retryCount }),
-          DelaySeconds: Math.min(Math.pow(2, retryCount) * 5, 900)
-        }).promise();
+        await sqs.send(
+          new SendMessageCommand({
+            QueueUrl: QUEUE_URL,
+            MessageBody: JSON.stringify({
+              taskId,
+              answer,
+              attempt: retryCount,
+            }),
+            DelaySeconds: Math.min(Math.pow(2, retryCount) * 5, 900),
+          }),
+        );
 
         console.warn(`Retry #${retryCount} scheduled for task ${taskId}`);
       } else {
-        await dynamo.update({
-          TableName: TABLE_NAME,
-          Key: { taskId },
-          UpdateExpression: 'SET #status = :status, retries = :r, errorMessage = :e',
-          ExpressionAttributeNames: { '#status': 'status' },
-          ExpressionAttributeValues: {
-            ':status': 'Failed',
-            ':r': retryCount,
-            ':e': error.message
-          }
-        }).promise();
+        await dynamo.send(
+          new UpdateItemCommand({
+            TableName: TABLE_NAME,
+            Key: {
+              taskId: { S: taskId },
+            },
+            UpdateExpression: 'SET #status = :status, retries = :r, errorMessage = :e',
+            ExpressionAttributeNames: {
+              '#status': 'status',
+            },
+            ExpressionAttributeValues: {
+              ':status': { S: 'Failed' },
+              ':r': { N: retryCount.toString() },
+              ':e': { S: error.message },
+            },
+          }),
+        );
 
-        await sqs.sendMessage({
-          QueueUrl: DLQ_URL,
-          MessageBody: JSON.stringify({ taskId, answer, error: error.message })
-        }).promise();
+        await sqs.send(
+          new SendMessageCommand({
+            QueueUrl: DLQ_URL,
+            MessageBody: JSON.stringify({
+              taskId,
+              answer,
+              error: error.message,
+            }),
+          }),
+        );
 
         console.error(`Task ${taskId} failed permanently: ${error.message}`);
       }

@@ -1,14 +1,18 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { formatJSONResponse } from '@libs/api-gateway';
-import { DynamoDB } from 'aws-sdk';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { middyfy } from '@libs/lambda';
+import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
 
-const dynamo = new DynamoDB.DocumentClient();
+const dynamo = new DynamoDBClient({});
+const docClient = DynamoDBDocumentClient.from(dynamo);
+
 const TASK_TABLE = process.env.TASK_TABLE;
 
 const getTasks: APIGatewayProxyHandler = async () => {
   try {
-    const result = await dynamo.scan({ TableName: TASK_TABLE }).promise();
+    const result = await docClient.send(new ScanCommand({ TableName: TASK_TABLE }));
+
     return formatJSONResponse({
       items: result.Items || [],
     });

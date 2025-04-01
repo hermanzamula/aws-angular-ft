@@ -17,21 +17,18 @@ const serverlessConfiguration: AWS = {
     environment: {
       TASK_TABLE: 'Tasks',
       TASK_QUEUE_URL: {
-        Ref: 'TaskQueue'
+        Ref: 'TaskQueue',
       },
       DLQ_URL: {
-        Ref: 'TaskDLQ'
-      }
+        Ref: 'TaskDLQ',
+      },
     },
     iam: {
       role: {
         statements: [
           {
             Effect: 'Allow',
-            Action: [
-              'dynamodb:*',
-              'sqs:*',
-            ],
+            Action: ['dynamodb:*', 'sqs:*'],
             Resource: '*',
           },
         ],
@@ -46,7 +43,8 @@ const serverlessConfiguration: AWS = {
   },
 
   package: {
-    individually: true
+    individually: true,
+    excludeDevDependencies: true,
   },
 
   custom: {
@@ -56,8 +54,9 @@ const serverlessConfiguration: AWS = {
       sourcemap: true,
       target: 'node20',
       platform: 'node',
-      concurrency: 10
-    }
+      concurrency: 10,
+      format: 'cjs',
+    },
   },
 
   resources: {
@@ -68,15 +67,15 @@ const serverlessConfiguration: AWS = {
           QueueName: 'TaskQueue',
           RedrivePolicy: {
             deadLetterTargetArn: { 'Fn::GetAtt': ['TaskDLQ', 'Arn'] },
-            maxReceiveCount: 2
-          }
-        }
+            maxReceiveCount: 2,
+          },
+        },
       },
       TaskDLQ: {
         Type: 'AWS::SQS::Queue',
         Properties: {
-          QueueName: 'TaskDLQ'
-        }
+          QueueName: 'TaskDLQ',
+        },
       },
       TaskTable: {
         Type: 'AWS::DynamoDB::Table',
@@ -86,17 +85,17 @@ const serverlessConfiguration: AWS = {
           AttributeDefinitions: [
             {
               AttributeName: 'taskId',
-              AttributeType: 'S'
-            }
+              AttributeType: 'S',
+            },
           ],
           KeySchema: [
             {
               AttributeName: 'taskId',
-              KeyType: 'HASH'
-            }
-          ]
-        }
-      }
+              KeyType: 'HASH',
+            },
+          ],
+        },
+      },
     },
     Outputs: {
       ApiUrl: {
@@ -107,16 +106,16 @@ const serverlessConfiguration: AWS = {
             [
               'https://',
               { Ref: 'ApiGatewayRestApi' },
-              '.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}'
-            ]
-          ]
+              '.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}',
+            ],
+          ],
         },
         Export: {
-          Name: 'TaskServiceApiUrl'
-        }
-      }
-    }
-  }
+          Name: 'TaskServiceApiUrl',
+        },
+      },
+    },
+  },
 };
 
 module.exports = serverlessConfiguration;
