@@ -4,6 +4,7 @@
   "description": "Fault-Tolerant System With Node Angular AWS",
   "main": "index.js",
   "scripts": {
+    "postinstall": "cd server && npm install && cd ../client && npm install",
     "deploy": "cross-env-shell deploy.sh",
     "start": "cd client && npm run start"
   },

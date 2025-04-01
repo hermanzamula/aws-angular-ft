@@ -2,6 +2,8 @@ import type { AWS } from '@serverless/typescript';
 import submitTask from '@functions/submitTask';
 import getTasks from '@functions/getTasks';
 import processTask from '@functions/processTask';
+import './env';
+import * as process from 'node:process';
 
 const serverlessConfiguration: AWS = {
   service: 'task-service',
@@ -12,8 +14,8 @@ const serverlessConfiguration: AWS = {
   provider: {
     name: 'aws',
     runtime: 'nodejs20.x',
-    region: 'eu-central-1',
-    stage: 'dev',
+    region: process.env.AWS_REGION! as AWS['provider']['region'],
+    stage: process.env.AWS_STAGE!,
     environment: {
       TASK_TABLE: 'Tasks',
       TASK_QUEUE_URL: {
