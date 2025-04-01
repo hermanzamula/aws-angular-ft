@@ -4,4 +4,5 @@ export interface Task {
   status: 'Pending' | 'Processed' | 'Failed';
   retries: number;
   errorMessage: string;
+  createdAt?: string;
 }

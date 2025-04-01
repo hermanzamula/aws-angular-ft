@@ -14,7 +14,6 @@ const submitTask: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (eve
   const { taskId, answer } = event.body;
 
   try {
-    // 1. Save task to DynamoDB
     await dynamo.send(
       new PutItemCommand({
         TableName: TABLE_NAME,
@@ -24,11 +23,11 @@ const submitTask: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (eve
           status: { S: 'Pending' },
           retries: { N: '0' },
           errorMessage: { S: '' },
+          createdAt: { S: new Date().toISOString() },
         },
       }),
     );
 
-    // 2. Send task to SQS
     await sqs.send(
       new SendMessageCommand({
         QueueUrl: QUEUE_URL,
