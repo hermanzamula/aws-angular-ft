@@ -6,6 +6,9 @@
 - Node.js 20.x installed
 - Serverless Framework installed (v3.x, **NOT v4.x**)
 
+## Architecture
+![Architecture Diagram](./docs/architecture.png)
+
 ## Configuration
 
 - Create an `.env` file in `server` folder by copying `.env.example` and filling in the required values.
@@ -17,6 +20,11 @@ AWS_STAGE=dev
 ```
 
 ## Deploying the Infrastructure
+- Install the dependencies for both frontend and backend applications:
+
+```bash
+npm install
+```
 
 - Run the following command to deploy the infrastructure:
 
