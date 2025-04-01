@@ -6,7 +6,9 @@
   "scripts": {
     "postinstall": "cd server && npm install && cd ../client && npm install",
     "deploy": "cross-env-shell deploy.sh",
-    "start": "cd client && npm run start"
+    "start": "cd client && npm run start",
+    "test:server": "cd server && npm test",
+    "test:client": "cd client && npm test"
   },
   "author": "",
   "license": "ISC",

@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+npm install
+
 echo "* Deploying Serverless backend..."
 cd server
 serverless deploy
@@ -18,7 +20,6 @@ cd ../client
 echo "API_URL=$apiUrl" > .env
 
 echo "* Building Angular frontend..."
-npm install
 npm run build
 
 echo "* Deployment complete!"
