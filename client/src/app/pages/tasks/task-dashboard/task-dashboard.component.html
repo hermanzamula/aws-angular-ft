@@ -1,25 +1,94 @@
-<form [formGroup]="taskForm" (ngSubmit)="onSubmit()">
-  <textarea formControlName="answer" placeholder="Your answer..." rows="3"></textarea>
-  <button type="submit" [disabled]="(loading$ | async)">Submit Task</button>
-</form>
+<div class="tasks-container container-fluid">
+  <div class="row h-100">
+    <div class="col-12 col-md-6 h-100 p-4">
+      <form class="rounded d-flex flex-column qa-panel h-10 p-4 h-100" [formGroup]="taskForm" (ngSubmit)="onSubmit()">
+        <div class="bg-white rounded mb-3 shadow-sm p-3 d-flex align-items-center justify-content-between">
+          <span class="text-muted small">Read aloud | Q1/3</span>
+        </div>
 
-<table>
-  <thead>
-  <tr>
-    <th>Task ID</th>
-    <th>Answer</th>
-    <th>Status</th>
-    <th>Retries</th>
-    <th>Error</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr *ngFor="let task of (tasks$ | async)">
-    <td>{{ task.taskId }}</td>
-    <td>{{ task.answer }}</td>
-    <td>{{ task.status }}</td>
-    <td>{{ task.retries }}</td>
-    <td>{{ task.errorMessage }}</td>
-  </tr>
-  </tbody>
-</table>
+        <div class="bg-white rounded p-5 shadow-sm mb-3 h-50">
+          <div class="text-primary fw-bold mb-2">QUESTION:</div>
+          <p class="mb-0 text-dark-emphasis">
+            Lorem ipsum dolor sit amet consectetur. Et sagittis morbi accumsan ultricies eu rhoncus. Ultrices rhoncus
+            massa duis non id neque?
+          </p>
+        </div>
+
+        <div class="bg-white rounded p-5 shadow-sm mb-3 flex-grow-1 d-flex flex-column h-25">
+          <label class="text-primary fw-bold mb-2">ANSWER:</label>
+          <textarea
+            class="form-control mb-2 flex-grow-1"
+            formControlName="answer"
+            [maxLength]="answerMaxLength"
+            placeholder="Enter your answer"
+            rows="5"
+          ></textarea>
+          <div class="text-end small text-muted">
+            {{ taskForm.get('answer')?.value?.length || 0 }}/{{ answerMaxLength }}
+          </div>
+        </div>
+
+        <div class="bg-white px-3 py-3 rounded shadow-sm mt-auto">
+          <button type="submit" class="btn btn-primary w-100" [disabled]="taskForm.invalid || (loading$ | async)">
+            Submit
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="col-12 col-md-6 h-100 p-4">
+      <div class="rounded shadow-sm tasks-table p-4 h-100 d-flex flex-column">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="text-primary fw-bold">DASHBOARD</div>
+          <button class="btn btn-outline-primary btn-sm" (click)="refreshTasks()" [disabled]="loading$ | async">
+            🔄 Refresh table
+          </button>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div *ngIf="loading$ | async" class="text-center my-5">
+          <div class="spinner-border text-primary" role="status"></div>
+        </div>
+
+        <!-- Table -->
+        <div *ngIf="!(loading$ | async)" class="rounded shadow-sm table-responsive overflow-auto flex-grow-1">
+          <table class="table table-striped align-middle mb-0">
+            <thead class="text-secondary small">
+              <tr>
+                <th>Task ID</th>
+                <th>Answer</th>
+                <th>Status</th>
+                <th>Retries</th>
+                <th>Error message</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let task of tasks$ | async">
+                <td class="text-break">{{ task.taskId }}</td>
+                <td class="text-break">{{ task.answer }}</td>
+                <td>
+                  <span
+                    class="badge"
+                    [ngClass]="{
+                      'bg-success': task.status === 'Processed',
+                      'bg-danger': task.status === 'Failed',
+                      'bg-warning text-dark': task.status === 'Pending',
+                    }"
+                  >
+                    {{ task.status }}
+                  </span>
+                </td>
+                <td>{{ task.retries }}</td>
+                <td class="text-danger text-break small">{{ task.errorMessage || '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div *ngIf="(tasks$ | async)?.length === 0 && !(loading$ | async)" class="text-center text-muted py-4">
+          No tasks available.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

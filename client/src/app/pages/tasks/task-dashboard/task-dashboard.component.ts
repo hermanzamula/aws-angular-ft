@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngxs/store';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observable, interval, Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 
@@ -16,33 +16,44 @@ import { LoadTasks, SubmitTask } from '../../../state/task/task.actions';
   styleUrls: ['./task-dashboard.component.scss'],
 })
 export class TaskDashboardComponent implements OnInit, OnDestroy {
-  taskForm: FormGroup;
+  taskForm: FormGroup<{ answer: FormControl<string | null> }>;
   tasks$: Observable<Task[]>;
   loading$: Observable<boolean>;
-  pollSub!: Subscription;
+  subscriptions: Subscription;
+  protected readonly answerMaxLength = 200;
 
   constructor(
     private fb: FormBuilder,
     private store: Store,
   ) {
-    this.taskForm = this.fb.group({ answer: [''] });
+    this.taskForm = this.fb.group({
+      answer: new FormControl('', { validators: [Validators.required, Validators.maxLength(this.answerMaxLength)] }),
+    });
     this.tasks$ = this.store.select(TaskState.tasks);
     this.loading$ = this.store.select(TaskState.loading);
+    this.subscriptions = new Subscription();
   }
 
   ngOnInit(): void {
     this.store.dispatch(new LoadTasks());
-    this.pollSub = interval(5000).subscribe(() => {
-      this.store.dispatch(new LoadTasks());
-    });
+    this.subscriptions.add(
+      interval(5000).subscribe(() => {
+        this.store.dispatch(new LoadTasks());
+      }),
+    );
   }
 
   ngOnDestroy(): void {
-    this.pollSub?.unsubscribe();
+    this.subscriptions?.unsubscribe();
   }
 
   onSubmit(): void {
-    const answer = this.taskForm.value.answer;
+    if (this.taskForm.invalid) {
+      console.log('Form invalid');
+      return;
+    }
+
+    const answer = this.taskForm.value.answer!;
     const task: Task = {
       taskId: crypto.randomUUID(),
       answer,
@@ -50,8 +61,14 @@ export class TaskDashboardComponent implements OnInit, OnDestroy {
       retries: 0,
       errorMessage: '',
     };
-    this.store.dispatch(new SubmitTask(task)).subscribe(() => {
-      this.taskForm.reset();
-    });
+    this.subscriptions.add(
+      this.store.dispatch(new SubmitTask(task)).subscribe(() => {
+        this.taskForm.reset();
+      }),
+    );
+  }
+
+  refreshTasks(): void {
+    this.store.dispatch(new LoadTasks());
   }
 }
