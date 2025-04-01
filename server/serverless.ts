@@ -2,8 +2,13 @@ import type { AWS } from '@serverless/typescript';
 import submitTask from '@functions/submitTask';
 import getTasks from '@functions/getTasks';
 import processTask from '@functions/processTask';
+import dlqMonitor from '@functions/dlqMonitor';
 import './env';
 import * as process from 'node:process';
+
+const DLQ_NAME = 'TaskDLQ';
+const TASK_QUEUE_NAME = 'TaskQueue';
+const TASK_TABLE_NAME = 'Tasks';
 
 const serverlessConfiguration: AWS = {
   service: 'task-service',
@@ -17,12 +22,12 @@ const serverlessConfiguration: AWS = {
     region: process.env.AWS_REGION! as AWS['provider']['region'],
     stage: process.env.AWS_STAGE!,
     environment: {
-      TASK_TABLE: 'Tasks',
+      TASK_TABLE: TASK_TABLE_NAME,
       TASK_QUEUE_URL: {
-        Ref: 'TaskQueue',
+        Ref: TASK_QUEUE_NAME,
       },
       DLQ_URL: {
-        Ref: 'TaskDLQ',
+        Ref: DLQ_NAME,
       },
     },
     iam: {
@@ -42,6 +47,7 @@ const serverlessConfiguration: AWS = {
     submitTask,
     getTasks,
     processTask,
+    dlqMonitor,
   },
 
   package: {
@@ -63,26 +69,26 @@ const serverlessConfiguration: AWS = {
 
   resources: {
     Resources: {
-      TaskQueue: {
+      [TASK_QUEUE_NAME]: {
         Type: 'AWS::SQS::Queue',
         Properties: {
-          QueueName: 'TaskQueue',
+          QueueName: TASK_QUEUE_NAME,
           RedrivePolicy: {
-            deadLetterTargetArn: { 'Fn::GetAtt': ['TaskDLQ', 'Arn'] },
+            deadLetterTargetArn: { 'Fn::GetAtt': [DLQ_NAME, 'Arn'] },
             maxReceiveCount: 2,
           },
         },
       },
-      TaskDLQ: {
+      [DLQ_NAME]: {
         Type: 'AWS::SQS::Queue',
         Properties: {
-          QueueName: 'TaskDLQ',
+          QueueName: DLQ_NAME,
         },
       },
       TaskTable: {
         Type: 'AWS::DynamoDB::Table',
         Properties: {
-          TableName: 'Tasks',
+          TableName: TASK_TABLE_NAME,
           BillingMode: 'PAY_PER_REQUEST',
           AttributeDefinitions: [
             {
