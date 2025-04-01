@@ -7,6 +7,7 @@
 - Serverless Framework installed (v3.x, **NOT v4.x**)
 
 ## Architecture
+
 ![Architecture Diagram](./docs/architecture.png)
 
 ## Configuration
@@ -20,6 +21,7 @@ AWS_STAGE=dev
 ```
 
 ## Deploying the Infrastructure
+
 - Install the dependencies for both frontend and backend applications:
 
 ```bash
@@ -57,6 +59,7 @@ npm run start
 ```
 
 ## Unit tests
+
 Both the frontend and backend applications have unit tests written using jest.
 
 - For the frontend application, run the following command:

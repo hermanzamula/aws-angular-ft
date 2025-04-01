@@ -6,10 +6,10 @@ export default {
     {
       sqs: {
         arn: {
-          'Fn::GetAtt': ['TaskDLQ', 'Arn']
+          'Fn::GetAtt': ['TaskDLQ', 'Arn'],
         },
-        batchSize: 1
-      }
-    }
-  ]
+        batchSize: 1,
+      },
+    },
+  ],
 };

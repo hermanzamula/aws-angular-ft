@@ -41,7 +41,7 @@ export class TaskState {
     });
     return this.taskService.submitTask(action.payload).pipe(
       catchError(() => of(null)),
-      finalize(() => ctx.patchState({ loading: false }))
+      finalize(() => ctx.patchState({ loading: false })),
     );
   }
 

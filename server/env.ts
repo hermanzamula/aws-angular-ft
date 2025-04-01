@@ -14,5 +14,5 @@ if (!fs.existsSync(envPath)) {
 dotenvSafe.config({
   path: envPath,
   example: examplePath,
-  allowEmptyValues: false
+  allowEmptyValues: false,
 });

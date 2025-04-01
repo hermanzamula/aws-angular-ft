@@ -37,17 +37,20 @@ describe('dlqMonitor handler', () => {
           eventSourceARN: 'arn:aws:sqs:region:123456789012:TaskDLQ',
           awsRegion: 'region',
           md5OfBody: '',
-        }
-      ]
+        },
+      ],
     };
 
     await dlqMonitor(event);
 
     expect(consoleWarnSpy).toHaveBeenCalledTimes(2);
-    expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('🚨 DLQ Message Received:'), expect.objectContaining({
-      body: event.Records[0].body,
-      messageId: event.Records[0].messageId
-    }));
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('🚨 DLQ Message Received:'),
+      expect.objectContaining({
+        body: event.Records[0].body,
+        messageId: event.Records[0].messageId,
+      }),
+    );
   });
 
   it('should handle empty events gracefully', async () => {

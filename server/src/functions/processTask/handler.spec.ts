@@ -39,12 +39,12 @@ describe('processTask handler', () => {
     };
 
     dynamoMock.on(UpdateItemCommand).resolves({});
-    
+
     const result = await processTaskHandler(event);
     expect(result.statusCode).toBe(200);
 
     const calls = dynamoMock.commandCalls(UpdateItemCommand);
-    const processedCall = calls.find(call => call.args[0].input.UpdateExpression.includes('SET #status = :status'));
+    const processedCall = calls.find((call) => call.args[0].input.UpdateExpression.includes('SET #status = :status'));
     expect(processedCall).toBeDefined();
   });
 
@@ -74,7 +74,7 @@ describe('processTask handler', () => {
     expect(result.statusCode).toBe(200);
 
     const updateCalls = dynamoMock.commandCalls(UpdateItemCommand);
-    const retryCall = updateCalls.find(call => call.args[0].input.UpdateExpression === 'SET retries = :r');
+    const retryCall = updateCalls.find((call) => call.args[0].input.UpdateExpression === 'SET retries = :r');
     expect(retryCall).toBeDefined();
 
     const sqsCalls = sqsMock.commandCalls(SendMessageCommand);
@@ -109,7 +109,9 @@ describe('processTask handler', () => {
     expect(result.statusCode).toBe(200);
 
     const updateCalls = dynamoMock.commandCalls(UpdateItemCommand);
-    const failureCall = updateCalls.find(call => call.args[0].input.UpdateExpression.includes('SET #status = :status'));
+    const failureCall = updateCalls.find((call) =>
+      call.args[0].input.UpdateExpression.includes('SET #status = :status'),
+    );
     expect(failureCall).toBeDefined();
 
     const sqsCalls = sqsMock.commandCalls(SendMessageCommand);

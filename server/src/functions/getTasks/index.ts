@@ -7,8 +7,8 @@ export default {
       http: {
         method: 'get',
         path: 'v1/tasks',
-        cors: true
-      }
-    }
-  ]
+        cors: true,
+      },
+    },
+  ],
 };
