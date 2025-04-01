@@ -1,8 +1,8 @@
-import { Task } from '../../../../../shared/models/task';
+import { TaskRequest } from '../../../../../shared/models/task';
 
 export class SubmitTask {
   static readonly type = '[Task] Submit';
-  constructor(public payload: Task) {}
+  constructor(public payload: TaskRequest) {}
 }
 
 export class LoadTasks {

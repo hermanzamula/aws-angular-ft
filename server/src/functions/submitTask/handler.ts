@@ -3,6 +3,7 @@ import { middyfy } from '@libs/lambda';
 import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import schema from './schema';
+import { TaskRequest } from '../../../../shared/models/task';
 
 const dynamo = new DynamoDBClient({});
 const sqs = new SQSClient({});
@@ -11,7 +12,7 @@ const TABLE_NAME = process.env.TASK_TABLE as string;
 const QUEUE_URL = process.env.TASK_QUEUE_URL as string;
 
 const submitTask: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
-  const { taskId, answer } = event.body;
+  const { taskId, answer } = event.body as TaskRequest;
 
   try {
     await dynamo.send(

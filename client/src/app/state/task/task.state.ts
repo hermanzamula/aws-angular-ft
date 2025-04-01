@@ -1,7 +1,7 @@
 import { State, Action, StateContext, Selector } from '@ngxs/store';
 import { SubmitTask, LoadTasks } from './task.actions';
 import { Injectable } from '@angular/core';
-import { tap, catchError } from 'rxjs/operators';
+import { tap, catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { Task } from '../../../../../shared/models/task';
 import { TaskService } from '../../services/task.service';
@@ -15,8 +15,8 @@ export interface TaskStateModel {
   name: 'taskState',
   defaults: {
     tasks: [],
-    loading: false
-  }
+    loading: false,
+  },
 })
 @Injectable()
 export class TaskState {
@@ -34,13 +34,14 @@ export class TaskState {
 
   @Action(SubmitTask)
   submitTask(ctx: StateContext<TaskStateModel>, action: SubmitTask) {
-    ctx.patchState({ loading: true });
+    const defaultTaskState: Task = { ...action.payload, status: 'Pending', retries: 0, errorMessage: '' };
+    ctx.patchState({
+      loading: true,
+      tasks: [defaultTaskState, ...ctx.getState().tasks],
+    });
     return this.taskService.submitTask(action.payload).pipe(
-      tap(() => ctx.patchState({ loading: false })),
-      catchError(() => {
-        ctx.patchState({ loading: false });
-        return of(null);
-      })
+      catchError(() => of(null)),
+      finalize(() => ctx.patchState({ loading: false }))
     );
   }
 
@@ -48,7 +49,7 @@ export class TaskState {
   loadTasks(ctx: StateContext<TaskStateModel>) {
     return this.taskService.getTasks().pipe(
       tap((tasks) => ctx.patchState({ tasks })),
-      catchError(() => of([]))
+      catchError(() => of([])),
     );
   }
 }

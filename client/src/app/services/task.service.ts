@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
-import { Task } from '../../../../shared/models/task';
+import { Task, TaskRequest } from '../../../../shared/models/task';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -10,7 +10,7 @@ export class TaskService {
 
   constructor(private http: HttpClient) {}
 
-  submitTask(task: Task): Observable<unknown> {
+  submitTask(task: TaskRequest): Observable<unknown> {
     return this.http.post(`${this.baseUrl}/v1/tasks`, task);
   }
 

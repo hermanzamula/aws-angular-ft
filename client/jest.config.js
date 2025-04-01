@@ -25,6 +25,6 @@ module.exports = {
   testMatch: ['**/*.spec.ts'],
   testEnvironment: 'jsdom',
   coverageReporters: ['html'],
-  // setupFilesAfterEnv: ['<rootDir>/src/setup-jest.ts'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleFileExtensions: ['ts', 'js', 'mjs', 'html', 'json'],
 };

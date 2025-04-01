@@ -6,3 +6,8 @@ export interface Task {
   errorMessage: string;
   createdAt?: string;
 }
+
+export interface TaskRequest {
+  taskId: string;
+  answer: string;
+}

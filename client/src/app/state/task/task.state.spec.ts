@@ -1,31 +1,28 @@
 import { TestBed } from '@angular/core/testing';
-import { Store, provideStore } from '@ngxs/store';
+import { provideStore, Store } from '@ngxs/store';
 import { TaskState } from './task.state';
 import { TaskService } from '../../services/task.service';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { Task } from '../../../../../shared/models/task';
 import { LoadTasks, SubmitTask } from './task.actions';
 
 describe('Task state', () => {
   let store: Store;
-  let taskServiceMock: { submitTask: jest.Mock, getTasks: jest.Mock };
+  let taskServiceMock: { submitTask: jest.Mock; getTasks: jest.Mock };
 
   const mockTasks: Task[] = [
     { taskId: '1', answer: 'Task 1', status: 'Pending', retries: 0, errorMessage: '' },
-    { taskId: '2', answer: 'Task 2', status: 'Processed', retries: 0, errorMessage: '' }
+    { taskId: '2', answer: 'Task 2', status: 'Processed', retries: 0, errorMessage: '' },
   ];
 
   beforeEach(() => {
     taskServiceMock = {
       submitTask: jest.fn(),
-      getTasks: jest.fn()
+      getTasks: jest.fn(),
     };
 
     TestBed.configureTestingModule({
-      providers: [
-        provideStore([TaskState]),
-        { provide: TaskService, useValue: taskServiceMock }
-      ]
+      providers: [provideStore([TaskState]), { provide: TaskService, useValue: taskServiceMock }],
     });
 
     store = TestBed.inject(Store);
@@ -54,12 +51,20 @@ describe('Task state', () => {
     expect(taskServiceMock.submitTask).toHaveBeenCalledWith(newTask);
   });
 
-  it('should set loading state to true when submitting a task and false after submission', () => {
-    taskServiceMock.submitTask.mockReturnValue(of({}));
+  it('should set loading state to true when submitting a task and false after submission', (done) => {
+    const submitSubject = new Subject<any>();
+    taskServiceMock.submitTask.mockReturnValue(submitSubject.asObservable());
 
-    store.dispatch(new SubmitTask({ taskId: '3', answer: 'Task 3', status: 'Pending', retries: 0, errorMessage: '' }));
+    const dispatch$ = store.dispatch(new SubmitTask({ taskId: '3', answer: 'Task 3' }));
 
-    const loading = store.selectSnapshot(TaskState.loading);
-    expect(loading).toBe(false);
+    expect(store.selectSnapshot(TaskState.loading)).toBe(true);
+
+    dispatch$.subscribe(() => {
+      expect(store.selectSnapshot(TaskState.loading)).toBe(false);
+      done();
+    });
+
+    submitSubject.next({});
+    submitSubject.complete();
   });
 });
