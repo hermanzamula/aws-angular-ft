@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { Task } from '../../../../shared/models/task';
 import { environment } from '../../environments/environment';
 
@@ -15,6 +15,6 @@ export class TaskService {
   }
 
   getTasks(): Observable<Task[]> {
-    return this.http.get<Task[]>(`${this.baseUrl}/v1/tasks`);
+    return this.http.get<{ items: Task[] }>(`${this.baseUrl}/v1/tasks`).pipe(map((data) => data.items));
   }
 }
